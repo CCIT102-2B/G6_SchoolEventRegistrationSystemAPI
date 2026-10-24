@@ -1,0 +1,6 @@
+@G6_SchoolEventRegistrationSystemAPI_HostAddress = http://localhost:5001
+
+GET {{G6_SchoolEventRegistrationSystemAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
