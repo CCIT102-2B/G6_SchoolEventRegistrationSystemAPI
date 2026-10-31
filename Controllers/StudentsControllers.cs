@@ -1,5 +1,11 @@
+using EventRegistrationAPI.Data;
+using Microsoft.AspNetCore.Mvc;
+
 namespace EventRegistrationAPI.Controllers;
 
+/// <summary>
+/// Everything about STUDENTS (Student Information). URLs start with /api/students
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class StudentsController : ControllerBase
@@ -11,7 +17,14 @@ public class StudentsController : ControllerBase
         _db = db;
     }
 
-     [HttpGet("{studentId}")]
+    /// <summary>
+    /// API 7: GET /api/students/2026-0123      (used by: the Registration Form)
+    /// Finds a student by student ID and lists the events they registered for.
+    /// The form uses it to fill in the name, grade and email of returning students.
+    /// Output: { studentId, fullName, gradeSection, email, registrations: [ { code, eventTitle, date, time, venue, registeredAt } ] }
+    ///         or 404 "Student not found"
+    /// </summary>
+    [HttpGet("{studentId}")]
     public IActionResult GetByStudentId(string studentId)
     {
         string id = DataStore.Clean(studentId, 20).ToUpper();

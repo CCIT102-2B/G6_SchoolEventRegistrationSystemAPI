@@ -1,6 +1,14 @@
+using EventRegistrationAPI.Data;
+using EventRegistrationAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+
 namespace EventRegistrationAPI.Controllers;
- 
- [ApiController]
+
+/// <summary>
+/// Everything about REGISTRATIONS: Register for Event (Registration Form)
+/// and the Registration Confirmation. URLs start with /api/registrations
+/// </summary>
+[ApiController]
 [Route("api/[controller]")]
 public class RegistrationsController : ControllerBase
 {
@@ -11,12 +19,23 @@ public class RegistrationsController : ControllerBase
         _db = db;
     }
 
-     {
+    // The confirmation the student sees after registering
+    private static object Confirmation(Registration r, Student s, SchoolEvent e) => new
+    {
         r.Code, s.StudentId, s.FullName, s.GradeSection, s.Email,
         eventTitle = e.Title, e.Date, e.Time, e.Venue, r.RegisteredAt
     };
 
-
+    /// <summary>
+    /// API 5: POST /api/registrations      (used by: Register for Event)
+    /// Registers one student for one event and returns a confirmation code.
+    /// Input:  { eventId, studentId, fullName, gradeSection, email }
+    /// Checks: all fields filled in, valid email, the event exists and has not passed,
+    ///         the event is not full, and the same student ID cannot register twice
+    ///         for the same event.
+    /// Also:   the student's information is saved (or updated if the student already exists).
+    /// Output: the confirmation with its code (status 201)
+    /// </summary>
     [HttpPost]
     public IActionResult Register(RegisterRequest req)
     {
@@ -31,7 +50,6 @@ public class RegistrationsController : ControllerBase
             return BadRequest(new { error = "Please enter a valid email address" });
 
         lock (_db)
-
         {
             var ev = _db.Events.FirstOrDefault(e => e.Id == req.EventId);
             if (ev == null) return NotFound(new { error = "Event not found" });
@@ -43,7 +61,8 @@ public class RegistrationsController : ControllerBase
             if (_db.Registrations.Any(r => r.EventId == ev.Id && r.StudentId == studentId))
                 return Conflict(new { error = $"Student {studentId} is already registered for this event" });
 
-                 var student = _db.Students.FirstOrDefault(s => s.StudentId == studentId);
+            // STUDENT INFORMATION: save the student once, update the details if they already exist
+            var student = _db.Students.FirstOrDefault(s => s.StudentId == studentId);
             if (student == null)
             {
                 student = new Student { StudentId = studentId };
@@ -54,7 +73,6 @@ public class RegistrationsController : ControllerBase
             student.Email = email;
 
             var reg = new Registration
-
             {
                 Id = _db.Registrations.Select(r => r.Id).DefaultIfEmpty(0).Max() + 1,
                 Code = DataStore.RandomCode(),
@@ -69,6 +87,11 @@ public class RegistrationsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// API 6: GET /api/registrations/K7M2QX      (used by: Registration Confirmation lookup)
+    /// Finds a registration by its confirmation code and returns the same confirmation again.
+    /// Output: the confirmation, or 404 "No registration found for that code"
+    /// </summary>
     [HttpGet("{code}")]
     public IActionResult GetByCode(string code)
     {

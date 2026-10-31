@@ -1,5 +1,13 @@
+using EventRegistrationAPI.Data;
+using EventRegistrationAPI.Models;
+using Microsoft.AspNetCore.Mvc;
+
 namespace EventRegistrationAPI.Controllers;
 
+/// <summary>
+/// Everything about EVENTS: View Events, Event Details, Add Event, View Participants.
+/// [Route("api/[controller]")] means every URL here starts with /api/events
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class EventsController : ControllerBase
@@ -12,7 +20,8 @@ public class EventsController : ControllerBase
         _db = db;
     }
 
-     private object WithCounts(SchoolEvent e)
+    // Adds "registered", "seatsLeft" and "isPast" to an event before we send it to the page
+    private object WithCounts(SchoolEvent e)
     {
         int registered = _db.Registrations.Count(r => r.EventId == e.Id);
         return new
@@ -24,7 +33,8 @@ public class EventsController : ControllerBase
         };
     }
 
- [HttpGet]
+   
+    [HttpGet]
     public IActionResult GetAll()
     {
         lock (_db)
@@ -37,7 +47,31 @@ public class EventsController : ControllerBase
         }
     }
 
-[HttpPost]
+    /// <summary>
+    /// API 2: GET /api/events/2      (used by: Event Details)
+    /// Gets ONE event by its id (the number in the URL).
+    /// Output: the event, or 404 "Event not found"
+    /// </summary>
+    [HttpGet("{id:int}")]
+    public IActionResult GetById(int id)
+    {
+        lock (_db)
+        {
+            var ev = _db.Events.FirstOrDefault(e => e.Id == id);
+            if (ev == null) return NotFound(new { error = "Event not found" });
+            return Ok(WithCounts(ev));
+        }
+    }
+
+    /// <summary>
+    /// API 3: POST /api/events       (used by: Add Event)
+    /// Creates a new event after checking the details.
+    /// Input:  { title, date, time, venue, capacity, description }
+    /// Checks: title and venue are required, the date cannot be in the past,
+    ///         capacity must be from 1 to 1000.
+    /// Output: the new event (status 201 = "created")
+    /// </summary>
+    [HttpPost]
     public IActionResult Create(CreateEventRequest req)
     {
         string title = DataStore.Clean(req.Title, 80);
@@ -49,8 +83,7 @@ public class EventsController : ControllerBase
         if (req.Capacity < 1 || req.Capacity > 1000) return BadRequest(new { error = "Maximum participants must be from 1 to 1000" });
 
         lock (_db)
-
-         {
+        {
             var ev = new SchoolEvent
             {
                 Id = _db.Events.Select(e => e.Id).DefaultIfEmpty(0).Max() + 1,
@@ -67,6 +100,11 @@ public class EventsController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// API 4: GET /api/events/2/participants      (used by: View Participants / Participant list)
+    /// Gets the event and the students registered for it, in the order they signed up.
+    /// Output: { event: {...}, participants: [ { studentId, fullName, gradeSection, email, registeredAt, code } ] }
+    /// </summary>
     [HttpGet("{id:int}/participants")]
     public IActionResult GetParticipants(int id)
     {
@@ -86,4 +124,3 @@ public class EventsController : ControllerBase
         }
     }
 }
-
