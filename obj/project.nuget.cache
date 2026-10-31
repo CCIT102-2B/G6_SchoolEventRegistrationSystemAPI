@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "r94RwIxvCuQ=",
+  "dgSpecHash": "PFqIMhUJe9w=",
   "success": true,
-  "projectFilePath": "C:\\Users\\CHARS\\OneDrive\\Documents\\MODELS\\G6_SchoolEventRegistrationSystemAPI\\G6_SchoolEventRegistrationSystemAPI.csproj",
+  "projectFilePath": "C:\\Users\\Earl Dictado\\Downloads\\CCIT102-PROJ\\CCIT102-PROJ\\G6_SchoolEventRegistrationSystemAPI\\G6_SchoolEventRegistrationSystemAPI.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\CHARS\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.12\\microsoft.aspnetcore.openapi.10.0.12.nupkg.sha512",
-    "C:\\Users\\CHARS\\.nuget\\packages\\microsoft.openapi\\2.12.0\\microsoft.openapi.2.12.0.nupkg.sha512"
+    "C:\\Users\\Earl Dictado\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.12\\microsoft.aspnetcore.openapi.10.0.12.nupkg.sha512",
+    "C:\\Users\\Earl Dictado\\.nuget\\packages\\microsoft.openapi\\2.12.0\\microsoft.openapi.2.12.0.nupkg.sha512"
   ],
   "logs": []
 }
